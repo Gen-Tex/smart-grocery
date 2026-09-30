@@ -17,31 +17,10 @@ const ROUTES={
 };
 
 const starterStores=[
-  {id:"walmart-278",name:"Walmart Supercenter #278",address:"1645 E Bert Kouns Industrial Loop, Shreveport, LA",template:"walmart_supercenter",note:"Location verified • route approximate"},
-  {id:"brook-107",name:"Brookshire's #107",address:"4918 Barksdale Blvd, Bossier City, LA 71112",template:"brookshires",note:"Location verified • route approximate"},
-  {id:"walmart-376",name:"Walmart Supercenter #376",address:"2536 Airline Dr, Bossier City, LA 71111",template:"walmart_supercenter",note:"Location verified • route approximate"},
-  {id:"walmart-5204",name:"Walmart Neighborhood Market #5204",address:"4000 Barksdale Blvd, Bossier City, LA 71112",template:"walmart_neighborhood",note:"Location verified • route approximate"},
-  {id:"walmart-3828",name:"Walmart Supercenter #3828",address:"4006 Estes Pkwy, Longview, TX 75603",template:"walmart_supercenter",note:"Location verified • route approximate"},
-  {id:"fresh-longview",name:"FRESH by Brookshire's",address:"3121 N Eastman Rd, Longview, TX 75605",template:"fresh",note:"Location verified • route approximate"}
+  {id:"my-store",name:"My Store",address:"",template:"manual",note:"Add or choose your preferred store."}
 ];
 
-const starterItems=[
-  ["Bananas","produce",2],["Chicken breasts","meat",12],["Beef","meat",12],
-  ["Bread","bakery",4],["Tortilla chips","snacks",4],["Corn Flakes","cereal",6],
-  ["Paper towels","paper",12],["Milk","dairy",4],["Dry mustard","pantry",3],
-  ["Flour","pantry",3],["Sugar","pantry",4],["Cayenne","pantry",3],
-  ["Jalapeño pepper","produce",1],["Shredded cheese","dairy",4],
-  ["Cavatappi noodles","pantry",2],["Parmesan cheese","dairy",5],
-  ["Coke Zero","drinks",8],["Gatorade","drinks",7],
-  ["Sparkling Lifesaver drinks","drinks",6],["Taki blue","snacks",4],
-  ["Doritos","snacks",5],["Fruity pebbles w/marshmallows","cereal",5],
-  ["Coco puffs","cereal",5],["Kitkats","snacks",4],["Steak fingers","frozen",8],
-  ["Toilet paper","paper",12],["Lunchables","refrigerated",4],
-  ["Triple Chocolate muffins","bakery",6],["Pretzels","snacks",4],
-  ["Sugar cookies","bakery",5],["Slim Jim's","snacks",5]
-].map(([name,department,price],i)=>({
-  id:`starter-${i+1}`,name,department,price,checked:false,createdAt:Date.now()+i
-}));
+const starterItems=[];
 
 const state={db:null,currentList:null,currentStore:null,undo:null,undoTimer:null};
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
@@ -70,8 +49,10 @@ async function seed(){
   if(!(await dbGetAll(STORES)).length)for(const s of starterStores)await dbPut(STORES,s);
   let setting=await dbGet(SETTINGS,"currentListId");
   if(!(await dbGetAll(LISTS)).length){
-    const list={id:"current-list",name:"Current List",storeId:"walmart-278",items:starterItems,createdAt:Date.now(),updatedAt:Date.now()};
-    await dbPut(LISTS,list);await dbPut(SETTINGS,{key:"currentListId",value:list.id});
+    const list={id:"current-list",name:"My Grocery List",storeId:"my-store",items:starterItems,createdAt:Date.now(),updatedAt:Date.now()};
+    await dbPut(LISTS,list);
+    await dbPut(SETTINGS,{key:"currentListId",value:list.id});
+    await dbPut(SETTINGS,{key:"onboardingNeeded",value:true});
     setting={value:list.id};
   }
   if(!setting){
@@ -157,6 +138,27 @@ function closeSheet(id){
 function closeAllSheets(){
   $$(".sheet").forEach(s=>s.classList.add("hidden"));
   $("#backdrop").classList.add("hidden");
+}
+
+async function completeOnboarding(sync){
+  await dbPut(SETTINGS,{key:"onboardingNeeded",value:false});
+  $("#welcomeScreen").classList.add("hidden");
+  if(sync&&typeof openCloudSheet==="function")openCloudSheet();
+}
+async function showOnboardingIfNeeded(){
+  const setting=await dbGet(SETTINGS,"onboardingNeeded");
+  if(setting?.value===true)$("#welcomeScreen").classList.remove("hidden");
+}
+async function shareApp(){
+  const url=location.origin+location.pathname;
+  const data={title:"Smart Grocery",text:"Try Smart Grocery — an installable grocery list with optional cross-device sync.",url};
+  try{
+    if(navigator.share){await navigator.share(data);return}
+    await navigator.clipboard.writeText(url);
+    alert("Smart Grocery link copied.");
+  }catch(e){
+    if(e?.name!=="AbortError")prompt("Copy this Smart Grocery link:",url);
+  }
 }
 
 function fillDeptSelect(){
@@ -274,6 +276,9 @@ async function importBackup(file){
 function wire(){
   fillDeptSelect();
   $("#menuBtn").onclick=()=>openSheet("menuPanel");
+  $("#shareAppBtn").onclick=shareApp;
+  $("#welcomeLocalBtn").onclick=()=>completeOnboarding(false);
+  $("#welcomeSyncBtn").onclick=()=>completeOnboarding(true);
   $("#changeStoreBtn").onclick=async()=>{await renderStores();openSheet("storeSheet")};
   $("#storesBtn").onclick=async()=>{closeSheet("menuPanel");await renderStores();openSheet("storeSheet")};
   $("#listsBtn").onclick=async()=>{closeSheet("menuPanel");await renderLists();openSheet("listsSheet")};
@@ -313,7 +318,7 @@ function wire(){
 
 async function init(){
   try{
-    state.db=await openDB();await seed();wire();await loadCurrent();
+    state.db=await openDB();await seed();wire();await loadCurrent();await showOnboardingIfNeeded();
     if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});
   }catch(e){
     console.error(e);
