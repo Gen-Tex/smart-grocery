@@ -1,4 +1,4 @@
-let cloudClient=null,cloudUser=null,cloudPollTimer=null,cloudBusy=false,lastCloudFingerprint="";
+let cloudClient=null,cloudUser=null,cloudPollTimer=null,cloudUploadTimer=null,cloudBusy=false,cloudDirty=false,lastCloudFingerprint="";
 
 function cloudConfigured(){
   const c=window.SMART_GROCERY_CLOUD||{};
@@ -18,6 +18,13 @@ async function cloudSnapshot(){
 }
 function fingerprint(payload){
   return JSON.stringify(payload);
+}
+function queueCloudUpload(store,val){
+  if(!cloudUser||cloudBusy)return;
+  if(store===SETTINGS&&val?.key==="cloudLinkedUser")return;
+  cloudDirty=true;
+  clearTimeout(cloudUploadTimer);
+  cloudUploadTimer=setTimeout(()=>uploadCloudSnapshot(),600);
 }
 async function replaceStore(storeName,rows){
   const existing=await dbGetAll(storeName);
@@ -48,8 +55,9 @@ async function readCloudRow(){
 }
 async function uploadCloudSnapshot(force=false){
   if(!cloudUser||cloudBusy)return;
+  clearTimeout(cloudUploadTimer);
   const payload=await cloudSnapshot(),fp=fingerprint(payload);
-  if(!force&&fp===lastCloudFingerprint)return;
+  if(!force&&!cloudDirty&&fp===lastCloudFingerprint)return;
   cloudBusy=true;cloudStatus("Syncing…");
   try{
     const {error}=await cloudClient.from("grocery_sync").upsert({
@@ -59,14 +67,16 @@ async function uploadCloudSnapshot(force=false){
     },{onConflict:"user_id"});
     if(error)throw error;
     lastCloudFingerprint=fp;
+    cloudDirty=false;
     cloudStatus("Synced","ok");
   }catch(e){
+    cloudDirty=true;
     console.error("Cloud upload failed",e);
     cloudStatus("Sync error","error");
   }finally{cloudBusy=false}
 }
 async function pullCloudIfChanged(){
-  if(!cloudUser||cloudBusy)return;
+  if(!cloudUser||cloudBusy||cloudDirty)return;
   try{
     const row=await readCloudRow();
     if(!row?.payload)return;
@@ -107,11 +117,10 @@ async function linkCloudUser(user){
   clearInterval(cloudPollTimer);
   cloudPollTimer=setInterval(async()=>{
     if(document.visibilityState==="visible"){
-      const fp=fingerprint(await cloudSnapshot());
-      if(fp!==lastCloudFingerprint)await uploadCloudSnapshot();
+      if(cloudDirty)await uploadCloudSnapshot();
       else await pullCloudIfChanged();
     }
-  },8000);
+  },5000);
   cloudStatus("Synced","ok");
 }
 async function cloudSignIn(){
@@ -126,7 +135,7 @@ async function cloudSignIn(){
 }
 async function cloudSignOut(remote=true){
   if(remote&&cloudClient)await cloudClient.auth.signOut();
-  cloudUser=null;clearInterval(cloudPollTimer);
+  cloudUser=null;cloudDirty=false;clearTimeout(cloudUploadTimer);clearInterval(cloudPollTimer);
   document.querySelector("#cloudSignInBtn").classList.remove("hidden");
   document.querySelector("#cloudSignOutBtn").classList.add("hidden");
   cloudStatus("Not signed in");
@@ -139,7 +148,10 @@ async function cloudInit(){
   document.querySelector("#cloudSyncBtn").onclick=openCloudSheet;
   document.querySelector("#cloudSignInBtn").onclick=cloudSignIn;
   document.querySelector("#cloudSignOutBtn").onclick=cloudSignOut;
-  document.querySelector("#cloudNowBtn").onclick=async()=>{await uploadCloudSnapshot(true);await pullCloudIfChanged()};
+  document.querySelector("#cloudNowBtn").onclick=async()=>{
+    if(cloudDirty)await uploadCloudSnapshot();
+    else await pullCloudIfChanged();
+  };
   if(!cloudConfigured()){
     cloudStatus("Cloud sync is not configured yet.");
     return;
