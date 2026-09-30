@@ -63,8 +63,8 @@ function openDB(){
 function tx(store,mode="readonly"){return state.db.transaction(store,mode).objectStore(store)}
 function dbGet(store,key){return new Promise((res,rej)=>{const r=tx(store).get(key);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
 function dbGetAll(store){return new Promise((res,rej)=>{const r=tx(store).getAll();r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
-function dbPut(store,val){return new Promise((res,rej)=>{const r=tx(store,"readwrite").put(val);r.onsuccess=()=>res(val);r.onerror=()=>rej(r.error)})}
-function dbDelete(store,key){return new Promise((res,rej)=>{const r=tx(store,"readwrite").delete(key);r.onsuccess=()=>res();r.onerror=()=>rej(r.error)})}
+function dbPut(store,val){return new Promise((res,rej)=>{const r=tx(store,"readwrite").put(val);r.onsuccess=()=>{res(val);if(typeof queueCloudUpload==="function")queueCloudUpload(store,val)};r.onerror=()=>rej(r.error)})}
+function dbDelete(store,key){return new Promise((res,rej)=>{const r=tx(store,"readwrite").delete(key);r.onsuccess=()=>{res();if(typeof queueCloudUpload==="function")queueCloudUpload(store,{key})};r.onerror=()=>rej(r.error)})}
 
 async function seed(){
   if(!(await dbGetAll(STORES)).length)for(const s of starterStores)await dbPut(STORES,s);
