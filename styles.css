@@ -13,3 +13,8 @@ dialog{border:0;border-radius:16px;padding:0;box-shadow:var(--shadow);width:min(
 @media(max-width:430px){.toolbar{grid-template-columns:1.35fr .9fr .9fr}.primary-btn,.secondary-btn,.danger-btn,.danger-outline{font-size:13px;padding:0 8px}}
 
 .cloud-callout{padding:12px;border-radius:12px;background:var(--accent-soft);color:#1e3a8a}.cloud-callout p{font-size:12px;margin-top:4px;color:#475569}.cloud-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.cloud-actions .primary-btn{grid-column:1/-1}.cloud-status{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#f8fafc;color:var(--muted);font-size:12px;font-weight:750}.cloud-status[data-tone="ok"]{background:#f0fdf4;color:#166534;border-color:#bbf7d0}.cloud-status[data-tone="error"]{background:#fef2f2;color:#991b1b;border-color:#fecaca}#cloudMenuStatus{font-size:11px;color:var(--muted)}
+
+.welcome-screen{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:20px;background:rgba(15,23,42,.72);backdrop-filter:blur(8px)}
+.welcome-card{width:min(420px,100%);background:#fff;border-radius:22px;padding:24px;box-shadow:var(--shadow);display:grid;gap:12px;text-align:center}
+.welcome-card h2{font-size:24px}.welcome-card p{color:var(--muted);font-size:14px;line-height:1.45}.welcome-card small{color:var(--muted);font-size:11px}
+.welcome-mark{width:54px;height:54px;margin:0 auto 2px;border-radius:16px;display:grid;place-items:center;background:var(--accent);color:#fff;font-size:28px;font-weight:900}
