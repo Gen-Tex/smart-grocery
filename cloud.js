@@ -1,4 +1,4 @@
-let cloudClient=null,cloudUser=null,cloudTimer=null,cloudPollTimer=null,cloudBusy=false,lastCloudFingerprint="";
+let cloudClient=null,cloudUser=null,cloudPollTimer=null,cloudBusy=false,lastCloudFingerprint="";
 
 function cloudConfigured(){
   const c=window.SMART_GROCERY_CLOUD||{};
@@ -124,8 +124,8 @@ async function cloudSignIn(){
   if(error){console.error(error);cloudStatus(error.message||"Sign-in failed","error");return}
   cloudStatus("Check your email for the sign-in link.","ok");
 }
-async function cloudSignOut(){
-  if(cloudClient)await cloudClient.auth.signOut();
+async function cloudSignOut(remote=true){
+  if(remote&&cloudClient)await cloudClient.auth.signOut();
   cloudUser=null;clearInterval(cloudPollTimer);
   document.querySelector("#cloudSignInBtn").classList.remove("hidden");
   document.querySelector("#cloudSignOutBtn").classList.add("hidden");
@@ -151,7 +151,7 @@ async function cloudInit(){
   else cloudStatus("Not signed in");
   cloudClient.auth.onAuthStateChange(async(_event,session)=>{
     if(session?.user&&session.user.id!==cloudUser?.id)await linkCloudUser(session.user);
-    if(!session?.user&&cloudUser)await cloudSignOut();
+    if(!session?.user&&cloudUser)await cloudSignOut(false);
   });
   window.addEventListener("focus",()=>pullCloudIfChanged());
   document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")pullCloudIfChanged()});
