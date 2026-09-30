@@ -15,8 +15,10 @@ Static, installable grocery-list app. No server or subscription required.
 - Optional cross-device cloud sync with Supabase email sign-in
 - JSON backup export/import
 - iPhone Home Screen installation
+- First-run choice for local-only use or cloud sync
+- One-tap app sharing using the device share sheet
 
-The starter list is the latest 31-item list and defaults to Walmart Supercenter #278 on E. Bert Kouns Industrial Loop in Shreveport.
+Fresh installs start with a blank **My Grocery List** and a generic **My Store** profile. Existing users keep their current local and cloud data.
 
 ## Publish with GitHub Pages
 1. Create a GitHub repository such as `smart-grocery`.
@@ -29,6 +31,11 @@ The starter list is the latest 31-item list and defaults to Walmart Supercenter 
 
 ## Data storage
 Lists and stores are stored locally in IndexedDB. When cloud sync is configured, the app also stores one per-user cloud snapshot in Supabase so the same lists can follow you between devices. **Export Backup** remains available as a manual safety copy.
+
+## Sharing with other people
+Everyone uses the same public app URL, but each signed-in user gets a separate Supabase Auth identity and an isolated `grocery_sync` row protected by Row Level Security. Local-only users remain device-local.
+
+For public email sign-in, configure custom SMTP in Supabase. The built-in Supabase mail service is intended for testing and only sends to pre-authorized project-team addresses.
 
 ## Cloud sync setup
 1. Create a Supabase project.
