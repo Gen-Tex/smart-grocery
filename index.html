@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Smart Grocery">
+  <title>Smart Grocery</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app-shell">
+  <header class="topbar">
+    <div><div class="eyebrow">SMART GROCERY</div><h1 id="listTitle">Current List</h1></div>
+    <button class="icon-btn" id="menuBtn">☰</button>
+  </header>
+
+  <section class="status-strip">
+    <div><span class="status-label">Checked</span><strong id="checkedTotal">$0.00</strong><small id="checkedCount">0 checked</small></div>
+    <div><span class="status-label">Expected</span><strong id="expectedTotal">$0.00</strong><small>current list</small></div>
+  </section>
+
+  <main>
+    <section class="card">
+      <div class="section-head">
+        <div>
+          <span class="section-kicker">STORE</span>
+          <h2 id="storeName"></h2>
+          <p id="storeAddress"></p>
+        </div>
+        <button class="text-btn" id="changeStoreBtn">Change</button>
+      </div>
+      <div id="storeNote" class="store-note"></div>
+    </section>
+
+    <section class="toolbar">
+      <button id="addItemBtn" class="primary-btn">+ Add Item</button>
+      <button id="checkAllBtn" class="secondary-btn">Check All</button>
+      <button id="uncheckAllBtn" class="secondary-btn">Uncheck</button>
+    </section>
+
+    <section id="undoBar" class="undo-bar hidden"><span id="undoText"></span><button id="undoBtn">Undo</button></section>
+    <section id="items" class="items"></section>
+
+    <section class="bottom-actions">
+      <button id="clearListBtn" class="danger-outline">Clear List</button>
+      <button id="newListBtn" class="secondary-btn">New List</button>
+    </section>
+  </main>
+</div>
+
+<div id="backdrop" class="backdrop hidden"></div>
+
+<aside id="menuPanel" class="sheet side-sheet hidden">
+  <div class="sheet-head"><h2>Lists & Data</h2><button class="icon-btn" data-close="menuPanel">✕</button></div>
+  <div class="sheet-body">
+    <button class="menu-row" id="listsBtn"><span>Saved Lists</span><b>›</b></button>
+    <button class="menu-row" id="storesBtn"><span>Stores</span><b>›</b></button>
+    <button class="menu-row" id="exportBtn"><span>Export Backup</span><b>↓</b></button>
+    <label class="menu-row file-row"><span>Import Backup</span><b>↑</b><input id="importInput" type="file" accept="application/json"></label>
+    <div class="install-card"><strong>Install on iPhone</strong><p>Open in Safari → Share → Add to Home Screen.</p></div>
+    <div class="version">Smart Grocery PWA v1.0</div>
+  </div>
+</aside>
+
+<section id="itemSheet" class="sheet bottom-sheet hidden">
+  <div class="sheet-head"><h2 id="itemSheetTitle">Add Item</h2><button class="icon-btn" data-close="itemSheet">✕</button></div>
+  <form id="itemForm" class="sheet-body form-grid">
+    <input type="hidden" id="itemId">
+    <label>Item<input id="itemName" required maxlength="80" autocomplete="off"></label>
+    <label>Department<select id="itemDept"></select></label>
+    <label>Estimated price<input id="itemPrice" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Optional"></label>
+    <button type="submit" class="primary-btn full">Save Item</button>
+  </form>
+</section>
+
+<section id="storeSheet" class="sheet bottom-sheet hidden">
+  <div class="sheet-head"><h2>Select Store</h2><button class="icon-btn" data-close="storeSheet">✕</button></div>
+  <div class="sheet-body"><div id="storeList" class="picker-list"></div><button id="addStoreBtn" class="secondary-btn full">+ Add Store</button></div>
+</section>
+
+<section id="addStoreSheet" class="sheet bottom-sheet hidden">
+  <div class="sheet-head"><h2>Add Store</h2><button class="icon-btn" data-close="addStoreSheet">✕</button></div>
+  <form id="storeForm" class="sheet-body form-grid">
+    <label>Store name<input id="newStoreName" required maxlength="100"></label>
+    <label>Address / location<input id="newStoreAddress" maxlength="140"></label>
+    <label>Layout template
+      <select id="newStoreTemplate">
+        <option value="walmart_supercenter">Walmart Supercenter</option>
+        <option value="walmart_neighborhood">Walmart Neighborhood Market</option>
+        <option value="brookshires">Brookshire's</option>
+        <option value="fresh">FRESH by Brookshire's</option>
+        <option value="manual">Manual / generic</option>
+      </select>
+    </label>
+    <button type="submit" class="primary-btn full">Save Store</button>
+  </form>
+</section>
+
+<section id="listsSheet" class="sheet bottom-sheet hidden">
+  <div class="sheet-head"><h2>Saved Lists</h2><button class="icon-btn" data-close="listsSheet">✕</button></div>
+  <div class="sheet-body"><div id="savedLists" class="picker-list"></div></div>
+</section>
+
+<section id="newListSheet" class="sheet bottom-sheet hidden">
+  <div class="sheet-head"><h2>New List</h2><button class="icon-btn" data-close="newListSheet">✕</button></div>
+  <form id="newListForm" class="sheet-body form-grid">
+    <label>List name<input id="newListName" required maxlength="80" value="Grocery List"></label>
+    <label class="inline-check"><input id="copyCurrentList" type="checkbox"><span>Copy items from current list</span></label>
+    <button type="submit" class="primary-btn full">Create List</button>
+  </form>
+</section>
+
+<dialog id="confirmDialog">
+  <form method="dialog">
+    <h3 id="confirmTitle">Clear list?</h3>
+    <p id="confirmMessage"></p>
+    <div class="dialog-actions">
+      <button value="cancel" class="secondary-btn">Cancel</button>
+      <button value="confirm" class="danger-btn">Clear</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="app.js" defer></script>
+</body>
+</html>
