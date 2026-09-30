@@ -59,7 +59,7 @@
   <div class="sheet-head"><h2>Lists & Data</h2><button class="icon-btn" data-close="menuPanel">✕</button></div>
   <div class="sheet-body">
     <button class="menu-row" id="listsBtn"><span>Saved Lists</span><b>›</b></button>
-    <button class="menu-row" id="storesBtn"><span>Stores</span><b>›</b></button>
+    <button class="menu-row" id="storesBtn"><span>Stores</span><b>›</b></button>\n    <button class="menu-row" id="cloudSyncBtn"><span>Cloud Sync</span><b id="cloudMenuStatus">Setup</b></button>
     <button class="menu-row" id="exportBtn"><span>Export Backup</span><b>↓</b></button>
     <label class="menu-row file-row"><span>Import Backup</span><b>↑</b><input id="importInput" type="file" accept="application/json"></label>
     <div class="install-card"><strong>Install on iPhone</strong><p>Open in Safari → Share → Add to Home Screen.</p></div>
@@ -101,6 +101,23 @@
   </form>
 </section>
 
+<section id="cloudSheet" class="sheet bottom-sheet hidden">
+  <div class="sheet-head"><h2>Cloud Sync</h2><button class="icon-btn" data-close="cloudSheet">✕</button></div>
+  <div class="sheet-body form-grid">
+    <div class="cloud-callout">
+      <strong>Same lists on every device</strong>
+      <p>Sign in with the same email on your iPhone and desktop. Your local copy still works offline.</p>
+    </div>
+    <label>Email<input id="cloudEmail" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com"></label>
+    <div class="cloud-actions">
+      <button id="cloudSignInBtn" type="button" class="primary-btn">Email Sign-In Link</button>
+      <button id="cloudSignOutBtn" type="button" class="secondary-btn hidden">Sign Out</button>
+      <button id="cloudNowBtn" type="button" class="secondary-btn">Sync Now</button>
+    </div>
+    <div id="cloudStatus" class="cloud-status">Cloud sync is not configured yet.</div>
+  </div>
+</section>
+
 <section id="listsSheet" class="sheet bottom-sheet hidden">
   <div class="sheet-head"><h2>Saved Lists</h2><button class="icon-btn" data-close="listsSheet">✕</button></div>
   <div class="sheet-body"><div id="savedLists" class="picker-list"></div></div>
@@ -126,6 +143,9 @@
   </form>
 </dialog>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="cloud-config.js" defer></script>
 <script src="app.js" defer></script>
+<script src="cloud.js" defer></script>
 </body>
 </html>
