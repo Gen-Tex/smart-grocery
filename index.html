@@ -55,16 +55,29 @@
 
 <div id="backdrop" class="backdrop hidden"></div>
 
+<section id="welcomeScreen" class="welcome-screen hidden" aria-modal="true" role="dialog">
+  <div class="welcome-card">
+    <div class="welcome-mark">✓</div>
+    <div class="eyebrow">SMART GROCERY</div>
+    <h2>Start your grocery list</h2>
+    <p>Use Smart Grocery locally on this device, or sign in to keep the same lists on all your devices.</p>
+    <button id="welcomeSyncBtn" class="primary-btn full">Sign In & Sync</button>
+    <button id="welcomeLocalBtn" class="secondary-btn full">Use on This Device</button>
+    <small>You can turn cloud sync on later from the menu.</small>
+  </div>
+</section>
+
 <aside id="menuPanel" class="sheet side-sheet hidden">
   <div class="sheet-head"><h2>Lists & Data</h2><button class="icon-btn" data-close="menuPanel">✕</button></div>
   <div class="sheet-body">
     <button class="menu-row" id="listsBtn"><span>Saved Lists</span><b>›</b></button>
     <button class="menu-row" id="storesBtn"><span>Stores</span><b>›</b></button>
     <button class="menu-row" id="cloudSyncBtn"><span>Cloud Sync</span><b id="cloudMenuStatus">Setup</b></button>
+    <button class="menu-row" id="shareAppBtn"><span>Share Smart Grocery</span><b>↗</b></button>
     <button class="menu-row" id="exportBtn"><span>Export Backup</span><b>↓</b></button>
     <label class="menu-row file-row"><span>Import Backup</span><b>↑</b><input id="importInput" type="file" accept="application/json"></label>
     <div class="install-card"><strong>Install on iPhone</strong><p>Open in Safari → Share → Add to Home Screen.</p></div>
-    <div class="version">Smart Grocery PWA v1.1</div>
+    <div class="version">Smart Grocery PWA v1.2</div>
   </div>
 </aside>
 
