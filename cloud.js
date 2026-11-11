@@ -48,9 +48,16 @@ async function applyCloudSnapshot(payload){
     lastCloudFingerprint=fingerprint(await cloudSnapshot());
   }finally{cloudBusy=false}
 }
+function normalizeCloudPayload(payload){
+  if(!payload)return payload;
+  const stores=[...(payload.stores||[])],ids=new Set(stores.map(s=>s.id));
+  for(const s of starterStores)if(!ids.has(s.id))stores.push(s);
+  return {...payload,stores};
+}
 async function readCloudRow(){
   const {data,error}=await cloudClient.from("grocery_sync").select("payload,updated_at").eq("user_id",cloudUser.id).maybeSingle();
   if(error)throw error;
+  if(data?.payload)data.payload=normalizeCloudPayload(data.payload);
   return data;
 }
 async function uploadCloudSnapshot(force=false){
