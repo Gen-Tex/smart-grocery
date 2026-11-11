@@ -13,6 +13,7 @@ const ROUTES={
   walmart_neighborhood:["produce","bakery","dairy","refrigerated","meat","snacks","cereal","pantry","drinks","paper","cleaning","personal","frozen","other"],
   brookshires:["produce","meat","bakery","snacks","cereal","pantry","drinks","cleaning","paper","personal","refrigerated","dairy","frozen","other"],
   fresh:["produce","bakery","meat","snacks","cereal","pantry","drinks","refrigerated","dairy","frozen","paper","cleaning","personal","other"],
+  kroger_marketplace:["produce","bakery","refrigerated","meat","dairy","snacks","cereal","pantry","drinks","paper","cleaning","personal","frozen","other"],
   manual:["produce","meat","bakery","snacks","cereal","pantry","drinks","paper","cleaning","personal","refrigerated","dairy","frozen","other"]
 };
 
@@ -22,7 +23,8 @@ const starterStores=[
   {id:"walmart-376",name:"Walmart Supercenter #376",address:"2536 Airline Dr, Bossier City, LA 71111",template:"walmart_supercenter",note:"Location verified • route approximate"},
   {id:"walmart-5204",name:"Walmart Neighborhood Market #5204",address:"4000 Barksdale Blvd, Bossier City, LA 71112",template:"walmart_neighborhood",note:"Location verified • route approximate"},
   {id:"walmart-3828",name:"Walmart Supercenter #3828",address:"4006 Estes Pkwy, Longview, TX 75603",template:"walmart_supercenter",note:"Location verified • route approximate"},
-  {id:"fresh-longview",name:"FRESH by Brookshire's",address:"3121 N Eastman Rd, Longview, TX 75605",template:"fresh",note:"Location verified • route approximate"}
+  {id:"fresh-longview",name:"FRESH by Brookshire's",address:"3121 N Eastman Rd, Longview, TX 75605",template:"fresh",note:"Location verified • route approximate"},
+  {id:"kroger-ellerbe-533",name:"Kroger Shreveport Marketplace",address:"9484 Ellerbe Rd Ste 100, Shreveport, LA 71106",template:"kroger_marketplace",note:"Location verified • store-specific department flow approximate"}
 ];
 
 const starterItems=[
@@ -66,8 +68,13 @@ function dbGetAll(store){return new Promise((res,rej)=>{const r=tx(store).getAll
 function dbPut(store,val){return new Promise((res,rej)=>{const r=tx(store,"readwrite").put(val);r.onsuccess=()=>{res(val);if(typeof queueCloudUpload==="function")queueCloudUpload(store,val)};r.onerror=()=>rej(r.error)})}
 function dbDelete(store,key){return new Promise((res,rej)=>{const r=tx(store,"readwrite").delete(key);r.onsuccess=()=>{res();if(typeof queueCloudUpload==="function")queueCloudUpload(store,{key})};r.onerror=()=>rej(r.error)})}
 
+async function ensureStarterStores(){
+  const existing=new Set((await dbGetAll(STORES)).map(s=>s.id));
+  for(const s of starterStores)if(!existing.has(s.id))await dbPut(STORES,s);
+}
+
 async function seed(){
-  if(!(await dbGetAll(STORES)).length)for(const s of starterStores)await dbPut(STORES,s);
+  await ensureStarterStores();
   let setting=await dbGet(SETTINGS,"currentListId");
   if(!(await dbGetAll(LISTS)).length){
     const list={id:"current-list",name:"Current List",storeId:"walmart-278",items:starterItems,createdAt:Date.now(),updatedAt:Date.now()};
