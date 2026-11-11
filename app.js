@@ -24,7 +24,7 @@ const starterStores=[
   {id:"walmart-5204",name:"Walmart Neighborhood Market #5204",address:"4000 Barksdale Blvd, Bossier City, LA 71112",template:"walmart_neighborhood",note:"Location verified • route approximate"},
   {id:"walmart-3828",name:"Walmart Supercenter #3828",address:"4006 Estes Pkwy, Longview, TX 75603",template:"walmart_supercenter",note:"Location verified • route approximate"},
   {id:"fresh-longview",name:"FRESH by Brookshire's",address:"3121 N Eastman Rd, Longview, TX 75605",template:"fresh",note:"Location verified • route approximate"},
-  {id:"kroger-airline-534",name:"Kroger Marketplace - Airline",address:"1050 George Dement Blvd, Bossier City, LA 71111",template:"kroger_marketplace",note:"Location verified • department flow approximate"}
+  {id:"kroger-ellerbe-533",name:"Kroger Shreveport Marketplace",address:"9484 Ellerbe Rd Ste 100, Shreveport, LA 71106",template:"kroger_marketplace",note:"Location verified • store-specific department flow approximate"}
 ];
 
 const starterItems=[
